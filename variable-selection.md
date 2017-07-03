@@ -52,7 +52,7 @@ Given the biased estimates and unrealistic standard errors of the post-single-se
 
 Until now, we assumed that the true effect is zero. However, in reality, we do not know that. It is an equally important question to see whether we are able to find the effect if it is there. We simulate new data with a positive treatment effect where the control is irrelevant ($\alpha = 0.2, \beta = 0$). On this data we can study the power of the variable selection methods. The power curves below reiterate that post-double-selection gets the size of the test right, but, more importantly, it also shows that we lose power relative to post-single-selection.
 
-![](figure/erp.png)\
+![](figure/power.png)\
 
 To summarize the trade-off between the size and the power of the variable selection methods, let's compare [true and false positive rates](https://en.wikipedia.org/wiki/False_positives_and_false_negatives) in a [ROC](https://en.wikipedia.org/wiki/Receiver_operating_characteristic)-type graph. Combining the simulated data from both states of the world we can analyze whether our methods find the effect if it is there (true positive) or wrongly find an effect if it is not there (false positive). The graph illustrates that post-single-selection yields too many false positives but more true positives as well. Post-double-selection is the most conservative and finds the effect the least frequently.
 
