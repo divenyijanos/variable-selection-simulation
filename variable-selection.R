@@ -81,7 +81,7 @@ simulation_results_methods %>%
     ggplot(aes(estimate, fill = model)) + 
     geom_density(alpha = 0.5, linetype = 0) + 
     facet_wrap(~method)
-ggsave("figures/coefficients.png")
+ggsave("figure/coefficients.png")
 
 simulation_results_methods %>%
     ggplot(aes(final_se, long_se)) + 
@@ -91,7 +91,7 @@ simulation_results_methods %>%
     ylab("Correct model") +
     coord_fixed(xlim = c(0.05, 0.15), ylim = c(0.05, 0.15)) +
     facet_wrap(~method)
-ggsave("figures/standard-errors.png")
+ggsave("figure/standard-errors.png")
 
 
 calculateERP <- function(df) {
@@ -115,7 +115,7 @@ ERPs %>%
     ggplot(aes(x = tolerance, y = ERP, color = method)) + 
     geom_line(size = 1) +
     ylab("Error in rejection probability (ERP)")
-ggsave("figures/erp.png")
+ggsave("figure/erp.png")
 
 calculateRejectionRate <- function(df, null_hyp) {
     mutate(df, final_tstat = abs((final - null_hyp)/final_se)) %>% 
@@ -145,7 +145,7 @@ map_df(methods, function(m) {
     scale_y_continuous(lim = c(0, NA), label = scales::percent) +
     ylab("Rejection rate") +
     xlab("Null hypothesis")
-ggsave("figures/power.png")
+ggsave("figure/power.png")
 
 map_df(methods, function(m) {
     simulation_results_all %>% 
@@ -164,4 +164,4 @@ map_df(methods, function(m) {
     ylab("True Positive Rate") +
     xlab(paste("False Positive Rate")) +
     coord_fixed(xlim = c(0, 1), ylim = c(0, 1))
-ggsave("figures/roc.png")
+ggsave("figure/roc.png")
