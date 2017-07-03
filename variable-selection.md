@@ -38,24 +38,24 @@ The figure below compares the distribution of the **parameter estimates** of the
 
 Single selection complemented with the eyeball test (using a cutoff of 0.05) highly improves the results, but still yields biased estimates. The post-double-selection estimator is unbiased (c.f. BCH Figure 1).
 
-![](figure/coefficients.png)\
+![coefficients](figure/coefficients.png){ width=100% }\
 
 TODO: EXPLAIN GRAPH BETTER
 
 Below you can see the **standard errors** of the long model and the post-selection standard errors across simulations for each selection method. Post-single-selection, with or without eyeballing, favors the short model too often, corresponding to overly optimistic standard errors of the main estimate. In contrast, post-double-selection yields correct standard errors.
 
-![](figure/standard-errors.png)\
+![](figure/standard-errors.png){ width=100% }\
 
 Given the biased estimates and unrealistic standard errors of the post-single-selection estimates, we investigate the size of the test on our parameter of interest. With the standard significance level of 5 percent, we would expect to reject the zero null hypothesis in 5 percent of the cases even if there is no effect. The figure below displays the error in the rejection probability (ERP, difference between the actual rejection rate and the theoretical 5 percent) for each selection method, as a function of the tolerance level of the eyeball-test. Since post-single-selection and post-double-selection do not depend on the tolerance-level, their ERP is constant. The figure illustrates that post-double-selection has the right size, whereas the ERP is above 16 percent for post-single selection, indicating that post-single-selection over-rejects (around four times). Post-single-selection complemented with the eyeball test provides a smooth transition between post-single- and post-double-selection. Importantly, if the eyeball test is not conservative enough, it also can lead to serious over-rejection.
 
-![](figure/erp.png)\
+![](figure/erp.png){ width=100% }\
 
 Until now, we assumed that the true effect is zero. However, in reality, we do not know that. It is an equally important question to see whether we are able to find the effect if it is there. We simulate new data with a positive treatment effect where the control is irrelevant ($\alpha = 0.2, \beta = 0$). On this data we can study the power of the variable selection methods. The power curves below reiterate that post-double-selection gets the size of the test right, but, more importantly, it also shows that we lose power relative to post-single-selection.
 
-![](figure/power.png)\
+![](figure/power.png){ width=100% }\
 
 To summarize the trade-off between the size and the power of the variable selection methods, let's compare [true and false positive rates](https://en.wikipedia.org/wiki/False_positives_and_false_negatives) in a [ROC](https://en.wikipedia.org/wiki/Receiver_operating_characteristic)-type graph. Combining the simulated data from both states of the world we can analyze whether our methods find the effect if it is there (true positive) or wrongly find an effect if it is not there (false positive). The graph illustrates that post-single-selection yields too many false positives but more true positives as well. Post-double-selection is the most conservative and finds the effect the least frequently.
 
-![](figure/roc.png)\
+![](figure/roc.png){ width=100% }\
 
 To sum up, post-double-selection can cure the problems (biasedness, over-rejection) of the standard practices for variable selection, but sacrifices power in exchange for that.
