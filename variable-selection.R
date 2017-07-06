@@ -63,6 +63,7 @@ calculateFinalEstimates <- function(results, method, ttest_p_cutoff = 0.05, eyeb
     )
 }
 
+
 # SIMULATION - takes a while depending on the speed of your computer
 set.seed(201706)
 n_sim <- 10000
@@ -74,13 +75,13 @@ simulation_results_methods <- map_df(methods, function(m) {
     mutate(method = m)
 }) %>% mutate(method = ordered(method, methods))
 
-
 simulation_results_methods %>%
     select(method, long, final) %>%
     gather(model, estimate, -method) %>%
     ggplot(aes(estimate, fill = model)) + 
     geom_density(alpha = 0.5, linetype = 0) + 
     facet_wrap(~method)
+dir.create('figure')
 ggsave("figure/coefficients.png", width = 8, height = 4)
 
 simulation_results_methods %>%
@@ -92,7 +93,6 @@ simulation_results_methods %>%
     coord_fixed(xlim = c(0.05, 0.15), ylim = c(0.05, 0.15)) +
     facet_wrap(~method)
 ggsave("figure/standard-errors.png", width = 8, height = 4)
-
 
 calculateERP <- function(df) {
     summarize(df, mean(final_p < 0.05) - 0.05) %>% 
