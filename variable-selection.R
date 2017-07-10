@@ -66,14 +66,16 @@ calculateFinalEstimates <- function(results, method, ttest_p_cutoff = 0.05, eyeb
 
 # SIMULATION - takes a while depending on the speed of your computer
 set.seed(201706)
-n_sim <- 10000
-simulation_results <- map_df(seq(n_sim), ~{simulateEstimation(alpha = 0, beta = 0.2)})
-methods <- list("single", "single-eyeball", "double")
-simulation_results_methods <- map_df(methods, function(m) {
+N_SIM <- 10000
+EYEBALL_CUTOFF <- 0.05
+METHODS <- list("single", "single-eyeball", "double")
+
+simulation_results <- map_df(seq(N_SIM), ~{simulateEstimation(alpha = 0, beta = 0.2)})
+simulation_results_methods <- map_df(METHODS, function(m) {
     simulation_results %>%
-    calculateFinalEstimates(method = m, ttest_p_cutoff = 0.05, eyeball_cutoff = 0.05) %>%
+    calculateFinalEstimates(method = m, eyeball_cutoff = EYEBALL_CUTOFF) %>%
     mutate(method = m)
-}) %>% mutate(method = ordered(method, methods))
+}) %>% mutate(method = ordered(method, METHODS))
 
 simulation_results_methods %>%
     select(method, long, final) %>%
@@ -117,9 +119,9 @@ ERPs %>%
     ylab("Error in rejection probability (ERP)")
 ggsave("figure/erp.png", width = 8, height = 4)
 
-calculateRejectionRate <- function(df, null_hyp) {
+calculateRejectionRate <- function(df, null_hyp, significance_level = 0.05) {
     mutate(df, final_tstat = abs((final - null_hyp)/final_se)) %>% 
-    summarize(mean(final_tstat > abs(qt(0.025, final_df)))) %>% 
+    summarize(mean(final_tstat > abs(qt(significance_level/2, final_df)))) %>% 
     as.numeric()
 }
 
@@ -127,15 +129,15 @@ simulation_results_all <- simulation_results %>%
     mutate(effect = 'no') %>%
     rbind(
         map_df(
-            seq(n_sim), 
+            seq(N_SIM), 
             ~{simulateEstimation(alpha = 0.2, beta = 0)}
         ) %>% mutate(effect = 'yes')
     )
 
-map_df(methods, function(m) {
+map_df(METHODS, function(m) {
     map_df(seq(0, 0.4, 0.005), function(null_hyp) {
         filter(simulation_results_all, effect == 'yes') %>%
-        calculateFinalEstimates(method = m, ttest_p_cutoff = 0.05, eyeball_cutoff = 0.01) %>%
+        calculateFinalEstimates(method = m, eyeball_cutoff = EYEBALL_CUTOFF) %>%
         calculateRejectionRate(., null_hyp) %>%
         tibble(rejection = ., null = null_hyp, method = m)    
     })
@@ -147,16 +149,20 @@ map_df(methods, function(m) {
     xlab("Null hypothesis")
 ggsave("figure/power.png", width = 8, height = 4)
 
-map_df(methods, function(m) {
-    simulation_results_all %>% 
-    group_by(effect) %>%
-    do(
-        calculateFinalEstimates(., m, eyeball_cutoff = 0.01) %>% 
-        calculateRejectionRate(., 0) %>%
-        tibble(rejection_rate = .)
-    ) %>%
-    mutate(method = m)
-}) %>%
+calculateRejectionRatesByState <- function(all_simulation, cutoff) {
+    map_df(METHODS, function(m) {
+        all_simulation %>% 
+        group_by(effect) %>%
+        do(
+            calculateFinalEstimates(., m, eyeball_cutoff = EYEBALL_CUTOFF) %>% 
+            calculateRejectionRate(., 0, cutoff) %>%
+            tibble(rejection_rate = .)
+        ) %>%
+        mutate(method = m, cutoff = cutoff)
+    })
+}
+
+calculateRejectionRatesByState(simulation_results_all, cutoff = 0.05) %>%
     spread(effect, rejection_rate) %>%
     ggplot(aes(no, yes, color = method)) +
     geom_point(size = 2) +
@@ -165,3 +171,13 @@ map_df(methods, function(m) {
     xlab(paste("False Positive Rate")) +
     coord_fixed(xlim = c(0, 1), ylim = c(0, 1))
 ggsave("figure/roc.png", width = 8, height = 4)
+
+map_df(seq(0, 1, 0.01), calculateRejectionRatesByState, all_simulation = simulation_results_all) %>%
+    spread(effect, rejection_rate) %>%
+    ggplot(aes(no, yes, color = method, group = method)) +
+    geom_line(size = 1) +
+    geom_abline(slope = 1, linetype = 'dashed') +
+    ylab("True Positive Rate") +
+    xlab(paste("False Positive Rate")) +
+    coord_fixed(xlim = c(0, 1), ylim = c(0, 1))
+ggsave("figure/roc_size_adjusted.png", width = 8, height = 4)
